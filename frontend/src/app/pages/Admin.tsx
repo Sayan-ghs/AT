@@ -169,25 +169,33 @@ export function Admin() {
 
         {/* 1. Create Property Asset */}
         <Section title="Create Property Asset" icon={<PlusCircle className="w-7 h-7" />}>
-          <div className="grid grid-cols-3 gap-6 mb-4">
-            <div>
-              <label className="block text-xs font-bold uppercase mb-2">Total Supply</label>
-              <input className={inputCls} value={supply} onChange={(e) => setSupply(e.target.value)} placeholder="1000000" />
+          {asId > 0 ? (
+            <div className="p-4 border-[3px] border-black bg-[#00FF88] font-bold text-sm">
+              ✓ Property asset already created — ASA ID: <span className="font-mono">{asId}</span>. The contract only allows one asset per deployment.
             </div>
-            <div>
-              <label className="block text-xs font-bold uppercase mb-2">Price / Token (μALGO)</label>
-              <input className={inputCls} value={price} onChange={(e) => setPrice(e.target.value)} placeholder="1000000 = 1 ALGO" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase mb-2">Metadata Hash (optional)</label>
-              <input className={inputCls} value={metaHash} onChange={(e) => setMetaHash(e.target.value)} placeholder="e.g. ipfs:// CID" />
-            </div>
-          </div>
-          <button onClick={handleCreate} disabled={loading} className={btnCls}>
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlusCircle className="w-4 h-4" />}
-            Create Asset
-          </button>
-          <StatusMsg msg={createMsg} />
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-6 mb-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase mb-2">Total Supply</label>
+                  <input className={inputCls} value={supply} onChange={(e) => setSupply(e.target.value)} placeholder="1000000" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase mb-2">Price / Token (μALGO)</label>
+                  <input className={inputCls} value={price} onChange={(e) => setPrice(e.target.value)} placeholder="1000000 = 1 ALGO" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase mb-2">Metadata Hash (optional)</label>
+                  <input className={inputCls} value={metaHash} onChange={(e) => setMetaHash(e.target.value)} placeholder="e.g. ipfs:// CID" />
+                </div>
+              </div>
+              <button onClick={handleCreate} disabled={loading} className={btnCls}>
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlusCircle className="w-4 h-4" />}
+                Create Asset
+              </button>
+              <StatusMsg msg={createMsg} />
+            </>
+          )}
         </Section>
 
         {/* 2. Verify Investor – eKYC */}
