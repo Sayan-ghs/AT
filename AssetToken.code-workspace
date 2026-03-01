@@ -1,0 +1,26 @@
+{
+  "folders": [
+    {
+      "path": "projects/AssetToken",
+      "name": "AssetToken (Smart Contract)"
+    },
+    {
+      "path": "projects/Frontend",
+      "name": "Frontend"
+    }
+  ],
+  "settings": {},
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-python.vscode-pylance"
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": []
+  },
+  "launch": {
+    "configurations": []
+  }
+}

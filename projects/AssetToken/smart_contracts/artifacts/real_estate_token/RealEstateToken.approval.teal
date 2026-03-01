@@ -1,0 +1,1093 @@
+#pragma version 11
+#pragma typetrack false
+
+// algopy.arc4.ARC4Contract.approval_program() -> uint64:
+main:
+    intcblock 0 1 32 8
+    bytecblock "tokens_owned" "admin" "asset_id" "rent_pool" "tokens_sold" "is_verified" "last_claim_round" "rent_deposit_round" "total_tokens" "price_per_token" 0x151f7c75
+    // smart_contracts/real_estate_token/contract.py:34
+    // class RealEstateToken(ARC4Contract):
+    txn NumAppArgs
+    bz main_bare_routing@20
+    txn OnCompletion
+    !
+    assert
+    txn ApplicationID
+    assert
+    pushbytess 0x017070c2 0xa5781818 0x4fd3b619 0x1d64d227 0x23be20a9 0x8f3b4adf 0x2378a0c6 0x2a2502a1 0x7ec73141 0xd348fbb3 0xbcf08543 // method "create_property_asset(uint64,uint64,byte[])uint64", method "update_price(uint64)void", method "verify_investor(address)void", method "buy_tokens(uint64)void", method "deposit_rent()void", method "claim_rent()uint64", method "freeze_account(address)void", method "unfreeze_account(address)void", method "clawback_tokens(address,uint64)void", method "transfer_admin(address)void", method "estimate_claimable_rent(address)uint64"
+    txna ApplicationArgs 0
+    match create_property_asset update_price verify_investor buy_tokens deposit_rent claim_rent freeze_account unfreeze_account clawback_tokens transfer_admin estimate_claimable_rent
+    err
+
+main_bare_routing@20:
+    // smart_contracts/real_estate_token/contract.py:34
+    // class RealEstateToken(ARC4Contract):
+    txn OnCompletion
+    switch main_create@21 main_opt_in@22 main_close_out@23
+    err
+
+main_close_out@23:
+    // smart_contracts/real_estate_token/contract.py:103
+    // @baremethod(allow_actions=["CloseOut"])
+    txn ApplicationID
+    assert
+    // smart_contracts/real_estate_token/contract.py:109
+    // assert self.tokens_owned[Txn.sender] == UInt64(0), "Must hold zero tokens to close out"
+    txn Sender
+    intc_0 // 0
+    bytec_0 // "tokens_owned"
+    app_local_get_ex
+    assert // check self.tokens_owned exists for account
+    !
+    assert // Must hold zero tokens to close out
+    // smart_contracts/real_estate_token/contract.py:103
+    // @baremethod(allow_actions=["CloseOut"])
+    intc_1 // 1
+    return
+
+main_opt_in@22:
+    // smart_contracts/real_estate_token/contract.py:92
+    // @baremethod(allow_actions=["OptIn"])
+    txn ApplicationID
+    assert
+    // smart_contracts/real_estate_token/contract.py:99
+    // self.tokens_owned[Txn.sender] = UInt64(0)
+    txn Sender
+    bytec_0 // "tokens_owned"
+    intc_0 // 0
+    app_local_put
+    // smart_contracts/real_estate_token/contract.py:100
+    // self.is_verified[Txn.sender] = UInt64(0)
+    txn Sender
+    bytec 5 // "is_verified"
+    intc_0 // 0
+    app_local_put
+    // smart_contracts/real_estate_token/contract.py:101
+    // self.last_claim_round[Txn.sender] = UInt64(0)
+    txn Sender
+    bytec 6 // "last_claim_round"
+    intc_0 // 0
+    app_local_put
+    // smart_contracts/real_estate_token/contract.py:92
+    // @baremethod(allow_actions=["OptIn"])
+    intc_1 // 1
+    return
+
+main_create@21:
+    // smart_contracts/real_estate_token/contract.py:78
+    // @baremethod(create="require")
+    txn ApplicationID
+    !
+    assert
+    // smart_contracts/real_estate_token/contract.py:85
+    // self.admin.value = Txn.sender
+    bytec_1 // "admin"
+    txn Sender
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:86
+    // self.tokens_sold.value = UInt64(0)
+    bytec 4 // "tokens_sold"
+    intc_0 // 0
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:87
+    // self.rent_pool.value = UInt64(0)
+    bytec_3 // "rent_pool"
+    intc_0 // 0
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:88
+    // self.asset_id.value = UInt64(0)
+    bytec_2 // "asset_id"
+    intc_0 // 0
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:89
+    // self.rent_deposit_round.value = UInt64(0)
+    bytec 7 // "rent_deposit_round"
+    intc_0 // 0
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:78
+    // @baremethod(create="require")
+    intc_1 // 1
+    return
+
+
+// smart_contracts.real_estate_token.contract.RealEstateToken.create_property_asset[routing]() -> void:
+create_property_asset:
+    // smart_contracts/real_estate_token/contract.py:115
+    // @abimethod()
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    txna ApplicationArgs 3
+    dup
+    intc_0 // 0
+    extract_uint16 // on error: invalid array length header
+    pushint 2
+    +
+    dig 1
+    len
+    ==
+    assert // invalid number of bytes for arc4.dynamic_array<arc4.uint8>
+    extract 2 0
+    // smart_contracts/real_estate_token/contract.py:140-141
+    // # ---- Access control ----
+    // assert Txn.sender == self.admin.value, "Only admin can create asset"
+    txn Sender
+    intc_0 // 0
+    bytec_1 // "admin"
+    app_global_get_ex
+    assert // check self.admin exists
+    ==
+    assert // Only admin can create asset
+    // smart_contracts/real_estate_token/contract.py:143-144
+    // # ---- One-time creation guard ----
+    // assert self.asset_id.value == UInt64(0), "Property asset already created"
+    intc_0 // 0
+    bytec_2 // "asset_id"
+    app_global_get_ex
+    assert // check self.asset_id exists
+    !
+    assert // Property asset already created
+    // smart_contracts/real_estate_token/contract.py:146-147
+    // # ---- Sanity checks ----
+    // assert total_supply > UInt64(0), "Supply must be > 0"
+    dig 2
+    assert // Supply must be > 0
+    // smart_contracts/real_estate_token/contract.py:148
+    // assert price > UInt64(0), "Price per token must be > 0"
+    dig 1
+    assert // Price per token must be > 0
+    // smart_contracts/real_estate_token/contract.py:150-151
+    // # ---- Store supply configuration ----
+    // self.total_tokens.value = total_supply
+    bytec 8 // "total_tokens"
+    dig 3
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:152
+    // self.price_per_token.value = price
+    bytec 9 // "price_per_token"
+    uncover 2
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:153
+    // self.metadata_hash.value = meta_hash
+    pushbytes "metadata_hash"
+    swap
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:155-169
+    // # ---- Inner transaction: create ASA ----
+    // # The contract is the sole authority; it will transfer tokens to buyers
+    // # and can freeze/clawback non-compliant accounts.
+    // created = itxn.AssetConfig(
+    //     total=total_supply,
+    //     decimals=0,               # whole units only – no fractional tokens
+    //     default_frozen=False,
+    //     manager=Global.current_application_address,
+    //     freeze=Global.current_application_address,
+    //     clawback=Global.current_application_address,
+    //     reserve=Global.current_application_address,
+    //     asset_name=b"RealEstateToken",
+    //     unit_name=b"RET",
+    //     fee=Global.min_txn_fee,
+    // ).submit()
+    itxn_begin
+    // smart_contracts/real_estate_token/contract.py:168
+    // fee=Global.min_txn_fee,
+    global MinTxnFee
+    // smart_contracts/real_estate_token/contract.py:162
+    // manager=Global.current_application_address,
+    global CurrentApplicationAddress
+    // smart_contracts/real_estate_token/contract.py:163-165
+    // freeze=Global.current_application_address,
+    // clawback=Global.current_application_address,
+    // reserve=Global.current_application_address,
+    dupn 3
+    // smart_contracts/real_estate_token/contract.py:167
+    // unit_name=b"RET",
+    pushbytes 0x524554
+    itxn_field ConfigAssetUnitName
+    // smart_contracts/real_estate_token/contract.py:166
+    // asset_name=b"RealEstateToken",
+    pushbytes 0x5265616c457374617465546f6b656e
+    itxn_field ConfigAssetName
+    itxn_field ConfigAssetReserve
+    itxn_field ConfigAssetClawback
+    itxn_field ConfigAssetFreeze
+    itxn_field ConfigAssetManager
+    // smart_contracts/real_estate_token/contract.py:161
+    // default_frozen=False,
+    intc_0 // 0
+    itxn_field ConfigAssetDefaultFrozen
+    // smart_contracts/real_estate_token/contract.py:160
+    // decimals=0,               # whole units only – no fractional tokens
+    intc_0 // 0
+    itxn_field ConfigAssetDecimals
+    swap
+    itxn_field ConfigAssetTotal
+    // smart_contracts/real_estate_token/contract.py:155-158
+    // # ---- Inner transaction: create ASA ----
+    // # The contract is the sole authority; it will transfer tokens to buyers
+    // # and can freeze/clawback non-compliant accounts.
+    // created = itxn.AssetConfig(
+    pushint 3 // acfg
+    itxn_field TypeEnum
+    itxn_field Fee
+    // smart_contracts/real_estate_token/contract.py:155-169
+    // # ---- Inner transaction: create ASA ----
+    // # The contract is the sole authority; it will transfer tokens to buyers
+    // # and can freeze/clawback non-compliant accounts.
+    // created = itxn.AssetConfig(
+    //     total=total_supply,
+    //     decimals=0,               # whole units only – no fractional tokens
+    //     default_frozen=False,
+    //     manager=Global.current_application_address,
+    //     freeze=Global.current_application_address,
+    //     clawback=Global.current_application_address,
+    //     reserve=Global.current_application_address,
+    //     asset_name=b"RealEstateToken",
+    //     unit_name=b"RET",
+    //     fee=Global.min_txn_fee,
+    // ).submit()
+    itxn_submit
+    itxn CreatedAssetID
+    // smart_contracts/real_estate_token/contract.py:172
+    // self.asset_id.value = new_asset_id
+    bytec_2 // "asset_id"
+    dig 1
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:115
+    // @abimethod()
+    itob
+    bytec 10 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// smart_contracts.real_estate_token.contract.RealEstateToken.update_price[routing]() -> void:
+update_price:
+    // smart_contracts/real_estate_token/contract.py:179
+    // @abimethod()
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // smart_contracts/real_estate_token/contract.py:188
+    // assert Txn.sender == self.admin.value, "Only admin can update price"
+    txn Sender
+    intc_0 // 0
+    bytec_1 // "admin"
+    app_global_get_ex
+    assert // check self.admin exists
+    ==
+    assert // Only admin can update price
+    // smart_contracts/real_estate_token/contract.py:189
+    // assert new_price > UInt64(0), "Price must be > 0"
+    dup
+    assert // Price must be > 0
+    // smart_contracts/real_estate_token/contract.py:190
+    // self.price_per_token.value = new_price
+    bytec 9 // "price_per_token"
+    swap
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:179
+    // @abimethod()
+    intc_1 // 1
+    return
+
+
+// smart_contracts.real_estate_token.contract.RealEstateToken.verify_investor[routing]() -> void:
+verify_investor:
+    // smart_contracts/real_estate_token/contract.py:196
+    // @abimethod()
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // smart_contracts/real_estate_token/contract.py:208
+    // assert Txn.sender == self.admin.value, "Only admin can verify investors"
+    txn Sender
+    intc_0 // 0
+    bytec_1 // "admin"
+    app_global_get_ex
+    assert // check self.admin exists
+    ==
+    assert // Only admin can verify investors
+    // smart_contracts/real_estate_token/contract.py:209-210
+    // # Ensure the account has opted into local state (slot must exist)
+    // assert investor.is_opted_in(Global.current_application_id), \
+    dup
+    global CurrentApplicationID
+    app_opted_in
+    // smart_contracts/real_estate_token/contract.py:209-211
+    // # Ensure the account has opted into local state (slot must exist)
+    // assert investor.is_opted_in(Global.current_application_id), \
+    //     "Investor must opt in to contract first"
+    assert // Investor must opt in to contract first
+    // smart_contracts/real_estate_token/contract.py:213
+    // self.is_verified[investor] = UInt64(1)
+    bytec 5 // "is_verified"
+    intc_1 // 1
+    app_local_put
+    // smart_contracts/real_estate_token/contract.py:196
+    // @abimethod()
+    intc_1 // 1
+    return
+
+
+// smart_contracts.real_estate_token.contract.RealEstateToken.buy_tokens[routing]() -> void:
+buy_tokens:
+    // smart_contracts/real_estate_token/contract.py:219
+    // @abimethod()
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // smart_contracts/real_estate_token/contract.py:243-244
+    // # ---- KYC gate ----
+    // assert self.is_verified[Txn.sender] == UInt64(1), "Investor not KYC-verified"
+    txn Sender
+    intc_0 // 0
+    bytec 5 // "is_verified"
+    app_local_get_ex
+    assert // check self.is_verified exists for account
+    intc_1 // 1
+    ==
+    assert // Investor not KYC-verified
+    // smart_contracts/real_estate_token/contract.py:246-247
+    // # ---- Asset guard ----
+    // assert self.asset_id.value != UInt64(0), "Property asset not yet created"
+    intc_0 // 0
+    bytec_2 // "asset_id"
+    app_global_get_ex
+    assert // check self.asset_id exists
+    dup
+    assert // Property asset not yet created
+    // smart_contracts/real_estate_token/contract.py:249-250
+    // # ---- Quantity guard ----
+    // assert quantity > UInt64(0), "Quantity must be > 0"
+    dig 1
+    assert // Quantity must be > 0
+    // smart_contracts/real_estate_token/contract.py:251
+    // available = self.total_tokens.value - self.tokens_sold.value
+    intc_0 // 0
+    bytec 8 // "total_tokens"
+    app_global_get_ex
+    assert // check self.total_tokens exists
+    intc_0 // 0
+    bytec 4 // "tokens_sold"
+    app_global_get_ex
+    assert // check self.tokens_sold exists
+    swap
+    dig 1
+    -
+    // smart_contracts/real_estate_token/contract.py:252
+    // assert available >= quantity, "Not enough tokens remaining"
+    dig 3
+    >=
+    assert // Not enough tokens remaining
+    // smart_contracts/real_estate_token/contract.py:254-256
+    // # ---- Group transaction validation ----
+    // # The group must be exactly: [Payment, AppCall(buy_tokens)]
+    // assert Global.group_size == UInt64(2), "Must be a group of exactly 2 transactions"
+    global GroupSize
+    pushint 2
+    ==
+    assert // Must be a group of exactly 2 transactions
+    // smart_contracts/real_estate_token/contract.py:257
+    // assert Txn.group_index == UInt64(1), "App call must be at group index 1"
+    txn GroupIndex
+    intc_1 // 1
+    ==
+    assert // App call must be at group index 1
+    // smart_contracts/real_estate_token/contract.py:259-260
+    // # ---- Retrieve payment transaction (at group index 0) ----
+    // payment = gtxn.PaymentTransaction(0)
+    intc_0 // 0
+    gtxns TypeEnum
+    intc_1 // pay
+    ==
+    assert // transaction type is pay
+    intc_0 // 0
+    // smart_contracts/real_estate_token/contract.py:261
+    // assert payment.receiver == Global.current_application_address, \
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    // smart_contracts/real_estate_token/contract.py:261-262
+    // assert payment.receiver == Global.current_application_address, \
+    //     "Payment receiver must be the contract"
+    assert // Payment receiver must be the contract
+    // smart_contracts/real_estate_token/contract.py:263
+    // expected_amount = quantity * self.price_per_token.value
+    intc_0 // 0
+    bytec 9 // "price_per_token"
+    app_global_get_ex
+    assert // check self.price_per_token exists
+    dig 3
+    *
+    // smart_contracts/real_estate_token/contract.py:259-260
+    // # ---- Retrieve payment transaction (at group index 0) ----
+    // payment = gtxn.PaymentTransaction(0)
+    intc_0 // 0
+    // smart_contracts/real_estate_token/contract.py:264
+    // assert payment.amount == expected_amount, "Payment amount mismatch"
+    gtxns Amount
+    ==
+    assert // Payment amount mismatch
+    // smart_contracts/real_estate_token/contract.py:269
+    // assert Txn.sender.is_opted_in(asa), "Buyer must opt in to ASA first"
+    txn Sender
+    dig 2
+    asset_holding_get AssetBalance
+    bury 1
+    assert // Buyer must opt in to ASA first
+    // smart_contracts/real_estate_token/contract.py:271-277
+    // # ---- Inner transaction: transfer ASA tokens to buyer ----
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.asset_id.value,
+    //     asset_receiver=Txn.sender,
+    //     asset_amount=quantity,
+    //     fee=Global.min_txn_fee,
+    // ).submit()
+    itxn_begin
+    // smart_contracts/real_estate_token/contract.py:276
+    // fee=Global.min_txn_fee,
+    global MinTxnFee
+    // smart_contracts/real_estate_token/contract.py:274
+    // asset_receiver=Txn.sender,
+    txn Sender
+    dig 4
+    itxn_field AssetAmount
+    itxn_field AssetReceiver
+    uncover 2
+    itxn_field XferAsset
+    // smart_contracts/real_estate_token/contract.py:271-272
+    // # ---- Inner transaction: transfer ASA tokens to buyer ----
+    // itxn.AssetTransfer(
+    pushint 4 // axfer
+    itxn_field TypeEnum
+    itxn_field Fee
+    // smart_contracts/real_estate_token/contract.py:271-277
+    // # ---- Inner transaction: transfer ASA tokens to buyer ----
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.asset_id.value,
+    //     asset_receiver=Txn.sender,
+    //     asset_amount=quantity,
+    //     fee=Global.min_txn_fee,
+    // ).submit()
+    itxn_submit
+    // smart_contracts/real_estate_token/contract.py:279-280
+    // # ---- State updates ----
+    // self.tokens_sold.value += quantity
+    dig 1
+    +
+    bytec 4 // "tokens_sold"
+    swap
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:281
+    // self.tokens_owned[Txn.sender] = self.tokens_owned[Txn.sender] + quantity
+    txn Sender
+    intc_0 // 0
+    bytec_0 // "tokens_owned"
+    app_local_get_ex
+    assert // check self.tokens_owned exists for account
+    +
+    txn Sender
+    bytec_0 // "tokens_owned"
+    uncover 2
+    app_local_put
+    // smart_contracts/real_estate_token/contract.py:219
+    // @abimethod()
+    intc_1 // 1
+    return
+
+
+// smart_contracts.real_estate_token.contract.RealEstateToken.deposit_rent[routing]() -> void:
+deposit_rent:
+    // smart_contracts/real_estate_token/contract.py:300
+    // assert Txn.sender == self.admin.value, "Only admin can deposit rent"
+    txn Sender
+    intc_0 // 0
+    bytec_1 // "admin"
+    app_global_get_ex
+    assert // check self.admin exists
+    ==
+    assert // Only admin can deposit rent
+    // smart_contracts/real_estate_token/contract.py:302-303
+    // # ---- Group transaction validation ----
+    // assert Global.group_size == UInt64(2), "Must be a group of exactly 2 transactions"
+    global GroupSize
+    pushint 2
+    ==
+    assert // Must be a group of exactly 2 transactions
+    // smart_contracts/real_estate_token/contract.py:304
+    // assert Txn.group_index == UInt64(1), "App call must be at group index 1"
+    txn GroupIndex
+    intc_1 // 1
+    ==
+    assert // App call must be at group index 1
+    // smart_contracts/real_estate_token/contract.py:306
+    // payment = gtxn.PaymentTransaction(0)
+    intc_0 // 0
+    gtxns TypeEnum
+    intc_1 // pay
+    ==
+    assert // transaction type is pay
+    intc_0 // 0
+    // smart_contracts/real_estate_token/contract.py:307
+    // assert payment.receiver == Global.current_application_address, \
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    // smart_contracts/real_estate_token/contract.py:307-308
+    // assert payment.receiver == Global.current_application_address, \
+    //     "Payment receiver must be the contract"
+    assert // Payment receiver must be the contract
+    // smart_contracts/real_estate_token/contract.py:306
+    // payment = gtxn.PaymentTransaction(0)
+    intc_0 // 0
+    // smart_contracts/real_estate_token/contract.py:309
+    // assert payment.amount > UInt64(0), "Must deposit a non-zero amount"
+    gtxns Amount
+    dup
+    assert // Must deposit a non-zero amount
+    // smart_contracts/real_estate_token/contract.py:311-313
+    // # ---- Update rent pool ----
+    // # Guard against integer overflow: total rents must fit in a UInt64
+    // new_rent = self.rent_pool.value + payment.amount
+    intc_0 // 0
+    bytec_3 // "rent_pool"
+    app_global_get_ex
+    assert // check self.rent_pool exists
+    dup
+    uncover 2
+    +
+    // smart_contracts/real_estate_token/contract.py:314
+    // assert new_rent >= self.rent_pool.value, "Rent pool overflow"
+    dup
+    uncover 2
+    >=
+    assert // Rent pool overflow
+    // smart_contracts/real_estate_token/contract.py:315
+    // self.rent_pool.value = new_rent
+    bytec_3 // "rent_pool"
+    swap
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:317-318
+    // # ---- Stamp the deposit round (used as anti-double-claim checkpoint) ----
+    // self.rent_deposit_round.value = Global.round
+    bytec 7 // "rent_deposit_round"
+    global Round
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:287
+    // @abimethod()
+    intc_1 // 1
+    return
+
+
+// smart_contracts.real_estate_token.contract.RealEstateToken.claim_rent[routing]() -> void:
+claim_rent:
+    // smart_contracts/real_estate_token/contract.py:347-348
+    // # ---- Preconditions ----
+    // assert self.is_verified[Txn.sender] == UInt64(1), "Investor not KYC-verified"
+    txn Sender
+    intc_0 // 0
+    bytec 5 // "is_verified"
+    app_local_get_ex
+    assert // check self.is_verified exists for account
+    intc_1 // 1
+    ==
+    assert // Investor not KYC-verified
+    // smart_contracts/real_estate_token/contract.py:349
+    // assert self.tokens_owned[Txn.sender] > UInt64(0), "No tokens owned"
+    txn Sender
+    intc_0 // 0
+    bytec_0 // "tokens_owned"
+    app_local_get_ex
+    assert // check self.tokens_owned exists for account
+    assert // No tokens owned
+    // smart_contracts/real_estate_token/contract.py:350
+    // assert self.rent_pool.value > UInt64(0), "Rent pool is empty"
+    intc_0 // 0
+    bytec_3 // "rent_pool"
+    app_global_get_ex
+    assert // check self.rent_pool exists
+    dup
+    assert // Rent pool is empty
+    // smart_contracts/real_estate_token/contract.py:352-353
+    // # ---- Anti-double-claim gate ----
+    // assert self.last_claim_round[Txn.sender] < self.rent_deposit_round.value, \
+    txn Sender
+    intc_0 // 0
+    bytec 6 // "last_claim_round"
+    app_local_get_ex
+    assert // check self.last_claim_round exists for account
+    intc_0 // 0
+    bytec 7 // "rent_deposit_round"
+    app_global_get_ex
+    assert // check self.rent_deposit_round exists
+    swap
+    dig 1
+    <
+    // smart_contracts/real_estate_token/contract.py:352-354
+    // # ---- Anti-double-claim gate ----
+    // assert self.last_claim_round[Txn.sender] < self.rent_deposit_round.value, \
+    //     "Already claimed for the current rent deposit"
+    assert // Already claimed for the current rent deposit
+    // smart_contracts/real_estate_token/contract.py:356-358
+    // # ---- Proportional share calculation ----
+    // # Multiply first to preserve precision (integer arithmetic)
+    // owned = self.tokens_owned[Txn.sender]
+    txn Sender
+    intc_0 // 0
+    bytec_0 // "tokens_owned"
+    app_local_get_ex
+    assert // check self.tokens_owned exists for account
+    // smart_contracts/real_estate_token/contract.py:359
+    // share = (owned * self.rent_pool.value) // self.total_tokens.value
+    uncover 2
+    *
+    intc_0 // 0
+    bytec 8 // "total_tokens"
+    app_global_get_ex
+    assert // check self.total_tokens exists
+    /
+    // smart_contracts/real_estate_token/contract.py:360
+    // assert share > UInt64(0), "Calculated claim is zero"
+    dup
+    assert // Calculated claim is zero
+    // smart_contracts/real_estate_token/contract.py:362-363
+    // # ---- Claim checkpoint update (BEFORE payout to follow CEI pattern) ----
+    // self.last_claim_round[Txn.sender] = self.rent_deposit_round.value
+    txn Sender
+    bytec 6 // "last_claim_round"
+    uncover 3
+    app_local_put
+    // smart_contracts/real_estate_token/contract.py:365-370
+    // # ---- Inner transaction: send ALGO to claimant ----
+    // itxn.Payment(
+    //     receiver=Txn.sender,
+    //     amount=share,
+    //     fee=Global.min_txn_fee,
+    // ).submit()
+    itxn_begin
+    // smart_contracts/real_estate_token/contract.py:369
+    // fee=Global.min_txn_fee,
+    global MinTxnFee
+    // smart_contracts/real_estate_token/contract.py:367
+    // receiver=Txn.sender,
+    txn Sender
+    dig 2
+    itxn_field Amount
+    itxn_field Receiver
+    // smart_contracts/real_estate_token/contract.py:365-366
+    // # ---- Inner transaction: send ALGO to claimant ----
+    // itxn.Payment(
+    intc_1 // pay
+    itxn_field TypeEnum
+    itxn_field Fee
+    // smart_contracts/real_estate_token/contract.py:365-370
+    // # ---- Inner transaction: send ALGO to claimant ----
+    // itxn.Payment(
+    //     receiver=Txn.sender,
+    //     amount=share,
+    //     fee=Global.min_txn_fee,
+    // ).submit()
+    itxn_submit
+    // smart_contracts/real_estate_token/contract.py:324
+    // @abimethod()
+    itob
+    bytec 10 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+
+// smart_contracts.real_estate_token.contract.RealEstateToken.freeze_account[routing]() -> void:
+freeze_account:
+    // smart_contracts/real_estate_token/contract.py:378
+    // @abimethod()
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // smart_contracts/real_estate_token/contract.py:391
+    // assert Txn.sender == self.admin.value, "Only admin can freeze accounts"
+    txn Sender
+    intc_0 // 0
+    bytec_1 // "admin"
+    app_global_get_ex
+    assert // check self.admin exists
+    ==
+    assert // Only admin can freeze accounts
+    // smart_contracts/real_estate_token/contract.py:392
+    // assert self.asset_id.value != UInt64(0), "No asset to freeze"
+    intc_0 // 0
+    bytec_2 // "asset_id"
+    app_global_get_ex
+    assert // check self.asset_id exists
+    dup
+    assert // No asset to freeze
+    // smart_contracts/real_estate_token/contract.py:394-399
+    // itxn.AssetFreeze(
+    //     freeze_asset=self.asset_id.value,
+    //     freeze_account=target,
+    //     frozen=True,
+    //     fee=Global.min_txn_fee,
+    // ).submit()
+    itxn_begin
+    // smart_contracts/real_estate_token/contract.py:398
+    // fee=Global.min_txn_fee,
+    global MinTxnFee
+    // smart_contracts/real_estate_token/contract.py:397
+    // frozen=True,
+    intc_1 // 1
+    itxn_field FreezeAssetFrozen
+    uncover 2
+    itxn_field FreezeAssetAccount
+    swap
+    itxn_field FreezeAsset
+    // smart_contracts/real_estate_token/contract.py:394
+    // itxn.AssetFreeze(
+    pushint 5 // afrz
+    itxn_field TypeEnum
+    itxn_field Fee
+    // smart_contracts/real_estate_token/contract.py:394-399
+    // itxn.AssetFreeze(
+    //     freeze_asset=self.asset_id.value,
+    //     freeze_account=target,
+    //     frozen=True,
+    //     fee=Global.min_txn_fee,
+    // ).submit()
+    itxn_submit
+    // smart_contracts/real_estate_token/contract.py:378
+    // @abimethod()
+    intc_1 // 1
+    return
+
+
+// smart_contracts.real_estate_token.contract.RealEstateToken.unfreeze_account[routing]() -> void:
+unfreeze_account:
+    // smart_contracts/real_estate_token/contract.py:401
+    // @abimethod()
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // smart_contracts/real_estate_token/contract.py:410
+    // assert Txn.sender == self.admin.value, "Only admin can unfreeze accounts"
+    txn Sender
+    intc_0 // 0
+    bytec_1 // "admin"
+    app_global_get_ex
+    assert // check self.admin exists
+    ==
+    assert // Only admin can unfreeze accounts
+    // smart_contracts/real_estate_token/contract.py:411
+    // assert self.asset_id.value != UInt64(0), "No asset"
+    intc_0 // 0
+    bytec_2 // "asset_id"
+    app_global_get_ex
+    assert // check self.asset_id exists
+    dup
+    assert // No asset
+    // smart_contracts/real_estate_token/contract.py:413-418
+    // itxn.AssetFreeze(
+    //     freeze_asset=self.asset_id.value,
+    //     freeze_account=target,
+    //     frozen=False,
+    //     fee=Global.min_txn_fee,
+    // ).submit()
+    itxn_begin
+    // smart_contracts/real_estate_token/contract.py:417
+    // fee=Global.min_txn_fee,
+    global MinTxnFee
+    // smart_contracts/real_estate_token/contract.py:416
+    // frozen=False,
+    intc_0 // 0
+    itxn_field FreezeAssetFrozen
+    uncover 2
+    itxn_field FreezeAssetAccount
+    swap
+    itxn_field FreezeAsset
+    // smart_contracts/real_estate_token/contract.py:413
+    // itxn.AssetFreeze(
+    pushint 5 // afrz
+    itxn_field TypeEnum
+    itxn_field Fee
+    // smart_contracts/real_estate_token/contract.py:413-418
+    // itxn.AssetFreeze(
+    //     freeze_asset=self.asset_id.value,
+    //     freeze_account=target,
+    //     frozen=False,
+    //     fee=Global.min_txn_fee,
+    // ).submit()
+    itxn_submit
+    // smart_contracts/real_estate_token/contract.py:401
+    // @abimethod()
+    intc_1 // 1
+    return
+
+
+// smart_contracts.real_estate_token.contract.RealEstateToken.clawback_tokens[routing]() -> void:
+clawback_tokens:
+    // smart_contracts/real_estate_token/contract.py:424
+    // @abimethod()
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    btoi
+    // smart_contracts/real_estate_token/contract.py:441
+    // assert Txn.sender == self.admin.value, "Only admin can clawback tokens"
+    txn Sender
+    intc_0 // 0
+    bytec_1 // "admin"
+    app_global_get_ex
+    assert // check self.admin exists
+    ==
+    assert // Only admin can clawback tokens
+    // smart_contracts/real_estate_token/contract.py:442
+    // assert self.asset_id.value != UInt64(0), "No asset exists"
+    intc_0 // 0
+    bytec_2 // "asset_id"
+    app_global_get_ex
+    assert // check self.asset_id exists
+    dup
+    assert // No asset exists
+    // smart_contracts/real_estate_token/contract.py:443
+    // assert amount > UInt64(0), "Clawback amount must be > 0"
+    dig 1
+    assert // Clawback amount must be > 0
+    // smart_contracts/real_estate_token/contract.py:444
+    // assert self.tokens_owned[target] >= amount, "Target owns fewer tokens than requested"
+    dig 2
+    intc_0 // 0
+    bytec_0 // "tokens_owned"
+    app_local_get_ex
+    assert // check self.tokens_owned exists for account
+    dup
+    dig 3
+    >=
+    assert // Target owns fewer tokens than requested
+    // smart_contracts/real_estate_token/contract.py:446-453
+    // # ---- Inner transaction: clawback ASA from target back to contract ----
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.asset_id.value,
+    //     asset_sender=target,           # the "from" party in a clawback
+    //     asset_receiver=Global.current_application_address,
+    //     asset_amount=amount,
+    //     fee=Global.min_txn_fee,
+    // ).submit()
+    itxn_begin
+    // smart_contracts/real_estate_token/contract.py:452
+    // fee=Global.min_txn_fee,
+    global MinTxnFee
+    // smart_contracts/real_estate_token/contract.py:450
+    // asset_receiver=Global.current_application_address,
+    global CurrentApplicationAddress
+    dig 4
+    itxn_field AssetAmount
+    itxn_field AssetReceiver
+    dig 4
+    itxn_field AssetSender
+    uncover 2
+    itxn_field XferAsset
+    // smart_contracts/real_estate_token/contract.py:446-447
+    // # ---- Inner transaction: clawback ASA from target back to contract ----
+    // itxn.AssetTransfer(
+    pushint 4 // axfer
+    itxn_field TypeEnum
+    itxn_field Fee
+    // smart_contracts/real_estate_token/contract.py:446-453
+    // # ---- Inner transaction: clawback ASA from target back to contract ----
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.asset_id.value,
+    //     asset_sender=target,           # the "from" party in a clawback
+    //     asset_receiver=Global.current_application_address,
+    //     asset_amount=amount,
+    //     fee=Global.min_txn_fee,
+    // ).submit()
+    itxn_submit
+    // smart_contracts/real_estate_token/contract.py:455-456
+    // # ---- Update local + global accounting ----
+    // self.tokens_owned[target] = self.tokens_owned[target] - amount
+    dig 1
+    -
+    uncover 2
+    bytec_0 // "tokens_owned"
+    uncover 2
+    app_local_put
+    // smart_contracts/real_estate_token/contract.py:457
+    // self.tokens_sold.value = self.tokens_sold.value - amount
+    intc_0 // 0
+    bytec 4 // "tokens_sold"
+    app_global_get_ex
+    assert // check self.tokens_sold exists
+    swap
+    -
+    bytec 4 // "tokens_sold"
+    swap
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:424
+    // @abimethod()
+    intc_1 // 1
+    return
+
+
+// smart_contracts.real_estate_token.contract.RealEstateToken.transfer_admin[routing]() -> void:
+transfer_admin:
+    // smart_contracts/real_estate_token/contract.py:467
+    // @abimethod()
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // smart_contracts/real_estate_token/contract.py:473
+    // assert Txn.sender == self.admin.value, "Only admin can transfer admin rights"
+    txn Sender
+    intc_0 // 0
+    bytec_1 // "admin"
+    app_global_get_ex
+    assert // check self.admin exists
+    ==
+    assert // Only admin can transfer admin rights
+    // smart_contracts/real_estate_token/contract.py:474
+    // self.admin.value = new_admin
+    bytec_1 // "admin"
+    swap
+    app_global_put
+    // smart_contracts/real_estate_token/contract.py:467
+    // @abimethod()
+    intc_1 // 1
+    return
+
+
+// smart_contracts.real_estate_token.contract.RealEstateToken.estimate_claimable_rent[routing]() -> void:
+estimate_claimable_rent:
+    // smart_contracts/real_estate_token/contract.py:480
+    // @abimethod(readonly=True)
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // smart_contracts/real_estate_token/contract.py:489
+    // if self.rent_pool.value == UInt64(0):
+    intc_0 // 0
+    bytec_3 // "rent_pool"
+    app_global_get_ex
+    assert // check self.rent_pool exists
+    bnz estimate_claimable_rent_after_if_else@3
+    // smart_contracts/real_estate_token/contract.py:490
+    // return UInt64(0)
+    intc_0 // 0
+
+estimate_claimable_rent_after_inlined_smart_contracts.real_estate_token.contract.RealEstateToken.estimate_claimable_rent@8:
+    // smart_contracts/real_estate_token/contract.py:480
+    // @abimethod(readonly=True)
+    itob
+    bytec 10 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+estimate_claimable_rent_after_if_else@3:
+    // smart_contracts/real_estate_token/contract.py:491
+    // if self.tokens_owned[investor] == UInt64(0):
+    dup
+    intc_0 // 0
+    bytec_0 // "tokens_owned"
+    app_local_get_ex
+    assert // check self.tokens_owned exists for account
+    bnz estimate_claimable_rent_after_if_else@5
+    // smart_contracts/real_estate_token/contract.py:492
+    // return UInt64(0)
+    intc_0 // 0
+    // smart_contracts/real_estate_token/contract.py:480
+    // @abimethod(readonly=True)
+    b estimate_claimable_rent_after_inlined_smart_contracts.real_estate_token.contract.RealEstateToken.estimate_claimable_rent@8
+
+estimate_claimable_rent_after_if_else@5:
+    // smart_contracts/real_estate_token/contract.py:493
+    // if self.last_claim_round[investor] >= self.rent_deposit_round.value:
+    dup
+    intc_0 // 0
+    bytec 6 // "last_claim_round"
+    app_local_get_ex
+    assert // check self.last_claim_round exists for account
+    intc_0 // 0
+    bytec 7 // "rent_deposit_round"
+    app_global_get_ex
+    assert // check self.rent_deposit_round exists
+    >=
+    bz estimate_claimable_rent_after_if_else@7
+    // smart_contracts/real_estate_token/contract.py:494
+    // return UInt64(0)
+    intc_0 // 0
+    // smart_contracts/real_estate_token/contract.py:480
+    // @abimethod(readonly=True)
+    b estimate_claimable_rent_after_inlined_smart_contracts.real_estate_token.contract.RealEstateToken.estimate_claimable_rent@8
+
+estimate_claimable_rent_after_if_else@7:
+    // smart_contracts/real_estate_token/contract.py:495
+    // owned = self.tokens_owned[investor]
+    dup
+    intc_0 // 0
+    bytec_0 // "tokens_owned"
+    app_local_get_ex
+    assert // check self.tokens_owned exists for account
+    // smart_contracts/real_estate_token/contract.py:496
+    // return (owned * self.rent_pool.value) // self.total_tokens.value
+    intc_0 // 0
+    bytec_3 // "rent_pool"
+    app_global_get_ex
+    assert // check self.rent_pool exists
+    *
+    intc_0 // 0
+    bytec 8 // "total_tokens"
+    app_global_get_ex
+    assert // check self.total_tokens exists
+    /
+    // smart_contracts/real_estate_token/contract.py:480
+    // @abimethod(readonly=True)
+    b estimate_claimable_rent_after_inlined_smart_contracts.real_estate_token.contract.RealEstateToken.estimate_claimable_rent@8

@@ -1,0 +1,29 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+
+/* Custom Slider Styling for Neubrutalism */
+input[type="range"].slider {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="range"].slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background: #00FF88;
+  border: 3px solid #000000;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+}
+
+input[type="range"].slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  background: #00FF88;
+  border: 3px solid #000000;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+}
